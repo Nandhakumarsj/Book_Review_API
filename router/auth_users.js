@@ -8,7 +8,7 @@ let users = [];
 
 const isValid = (username) => {
   //returns boolean
-  let filtered_users = users.filter((user) => user.name === username);
+  let filtered_users = users.filter((user) => user.username === username);
   if (filtered_users.length > 0) {
     return false;
   }
@@ -30,22 +30,21 @@ const authenticatedUser = (username, password) => {
 regd_users.post("/login", (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
-  const token = req.session.authorization['access_token'];
   if (username && password) {
     if (authenticatedUser(username, password))
     {
-      jwt.verify(token, 'access', (err, user)=>{
-      if(!err){
-        req.user = user;
-        return res.status(200).json({message: 'User is logged in'});
+      // One Hour valid token
+      let access_token = jwt.sign({data:password}, 'access', {expiresIn:60*60});
+      req.session['authorization'] = {
+        access_token, username
       }
-      else{
-        return res.status(403).json({message:'User Authentication Failed'})
-      }
-    });
+      res.send('User Logged In');
+    }
+    else{
+      res.send('User Authentication Failed')
     }
   } else {
-    res.json({message: "Error Logging In"});
+    res.send("Error Logging In");
   }
 });
 
@@ -54,13 +53,25 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
   const review = req.body.review;
   let filtered_book = books[isbn];
-  if (filtered_book){
-    filtered_book.reviews[review];
-  return res.status(200).send('Review Added');
-  }
-  else{
-    return res.status(404).send('Book Not Found');
-  }
+  if (req.session.authorization){
+  jwt.verify(token, 'access', (err, user)=>{
+    if(!err){
+      req.user = user;
+      if (filtered_book){
+      filtered_book.reviews[user] =review;
+      return res.status(200).send('Review Added');
+      }
+      else{
+        return res.status(404).send('Book Not Found');
+      }
+    }
+    else{
+      return res.status(403).send('User Not Authenticated');
+    }
+  });
+}else{
+  return res.send('User Not logged In');
+}
 });
 
 module.exports.authenticated = regd_users;

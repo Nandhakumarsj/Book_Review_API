@@ -1,5 +1,4 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -10,13 +9,7 @@ public_users.post("/register", (req, res) => {
   const password = req.body['password'];
   if (username && password) {
     if (isValid(username)) {
-      const access_token = jwt.sign({ data: password }, "access", {
-        expiresIn: 60 * 60,
-      });
-      req.session.authorization = {
-        access_token,
-        username,
-      };
+      users.push({'username':username, 'password':password});
       return res.send("User registered successfully");
     } else {
       return res.send("User name is already taken");
