@@ -6,17 +6,28 @@ const regd_users = express.Router();
 let users = [];
 
 const isValid = (username)=>{ //returns boolean
-//write code to check is the username is valid
+  let filtered_users = users.filter((user)=>user.name === username);
+  if(filtered_users.length>0){
+    return false;
+  }
+  return true;
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
-//write code to check if username and password match the one we have in records.
+  const username = username;
+  const password = password;
+  let filtered_users = users.filter((user)=> (user.username === username) && (user.password === password));
+  if (filtered_users.length>0){
+    return true;
+  }
+  return false;
 }
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let username = req.body.username;
+  let password = req.body.password;
+  
 });
 
 // Add a book review
