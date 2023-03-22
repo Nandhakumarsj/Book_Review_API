@@ -25,6 +25,20 @@ const authenticatedUser = (username, password) => {
   }
   return false;
 };
+regd_users.use("/auth", (req, res, next)=>{
+  if (req.session.authorization){
+    jwt.verify(token, 'access', (err, user)=>{
+      if(!err){
+        next();
+      }
+      else{
+        return res.status(403).send('User Not Authenticated');
+      }
+    });
+  }else{
+    return res.send('User Not logged In');
+  }
+});
 
 //only registered users can login
 regd_users.post("/login", (req, res) => {
@@ -38,13 +52,13 @@ regd_users.post("/login", (req, res) => {
       req.session['authorization'] = {
         access_token, username
       }
-      res.send('User Logged In');
+      return res.send('User Logged In');
     }
     else{
-      res.send('User Authentication Failed')
+      return res.send('User Authentication Failed')
     }
   } else {
-    res.send("Error Logging In");
+    return res.send("Error Logging In");
   }
 });
 
@@ -52,25 +66,27 @@ regd_users.post("/login", (req, res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
   const review = req.body.review;
-  if (req.session.authorization){
-  jwt.verify(token, 'access', (err, user)=>{
-    if(!err){
-      req.user = user;
-      if (books[isbn]){
-      books[isbn].reviews[user] =review;
-      return res.status(200).send('Review Added');
-      }
-      else{
-        return res.status(404).send('Book Not Found');
-      }
-    }
-    else{
-      return res.status(403).send('User Not Authenticated');
-    }
-  });
-}else{
-  return res.send('User Not logged In');
-}
+  if (books[isbn]){
+    books[isbn]['reviews'][req.session['authorization'].username] =review;
+    return res.status(200).send('Review Added');
+  }
+  else{
+    return res.status(404).send('Book Not Found');
+  }
+
+});
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res)=>{
+  const isbn = req.params.isbn;
+  const review = books[isbn]['reviews'][req.session['authorization'].username];
+  if (review){
+  delete books[isbn]['reviews'][req.session['authorization'].username];
+  return res.send('Review Deleted');
+  }
+  else{
+    return res.status(404).send('Review Already Deleted')
+  }
 });
 
 module.exports.authenticated = regd_users;
