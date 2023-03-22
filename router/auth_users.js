@@ -17,8 +17,6 @@ const isValid = (username) => {
 
 const authenticatedUser = (username, password) => {
   //returns boolean
-  const username = username;
-  const password = password;
   let filtered_users = users.filter(
     (user) => user.username === username && user.password === password
   );
@@ -32,8 +30,8 @@ const authenticatedUser = (username, password) => {
 regd_users.post("/login", (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
-  const token = req.session.authorization;
-  if (!username || !password) {
+  const token = req.session.authorization['access_token'];
+  if (username && password) {
     if (authenticatedUser(username, password))
     {
       jwt.verify(token, 'access', (err, user)=>{
