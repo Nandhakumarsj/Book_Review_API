@@ -6,8 +6,8 @@ let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
 public_users.post("/register", (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+  const username = req.body['username'];
+  const password = req.body['password'];
   if (username && password) {
     if (isValid(username)) {
       const access_token = jwt.sign({ data: password }, "access", {
