@@ -36,9 +36,9 @@ public_users.get("/isbn/:isbn", function (req, res) {
   const isbn = req.params.isbn;
   let collected_books = books[Number(isbn)];
   if (collected_books) {
-    return res.send(collected_books);
+    return res.send(JSON.stringify(collected_books, null, 4));
   } else {
-    return res.status(404).json({ message: "Book not Found" });
+    return res.status(404).send("Book not Found");
   }
 });
 
@@ -60,8 +60,8 @@ public_users.get("/title/:title", function (req, res) {
   const title = req.params.title;
   const book_array = Object.entries(books);
   const book_names = book_array.filter((book) => book[1]["title"] === title);
-  if (author_books.length > 0) {
-    return res.send(JSON.stringify(author_books, null, 4));
+  if (book_names.length > 0) {
+    return res.send(JSON.stringify(book_names, null, 4));
   }
   return res.status(404).send("No Books Found");
 });
@@ -71,7 +71,7 @@ public_users.get("/review/:isbn", function (req, res) {
   const isbn = req.params.isbn;
   const book = books[isbn];
   let reviews = book["reviews"];
-  if (reviews) {
+  if (Object.entries(reviews).length>0) {
     return res.status(200).send(JSON.stringify(reviews, null, 4));
   }
   return res.send("No Review Recorded");
