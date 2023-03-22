@@ -52,13 +52,12 @@ regd_users.post("/login", (req, res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
   const review = req.body.review;
-  let filtered_book = books[isbn];
   if (req.session.authorization){
   jwt.verify(token, 'access', (err, user)=>{
     if(!err){
       req.user = user;
-      if (filtered_book){
-      filtered_book.reviews[user] =review;
+      if (books[isbn]){
+      books[isbn].reviews[user] =review;
       return res.status(200).send('Review Added');
       }
       else{
