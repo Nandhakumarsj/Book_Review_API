@@ -1,4 +1,4 @@
-# Book Shop API
+# Book Review API
 
 - This is a simple API that handles necessary HTTP methods 
 - This API is created using Express.js and Node.js
